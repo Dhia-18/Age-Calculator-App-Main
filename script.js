@@ -1,108 +1,112 @@
-const day = document.getElementById("day");
-const month = document.getElementById("month");
-const year = document.getElementById("year");
+const form = document.querySelector("form");
 
-const dayResult = document.getElementById("day-result");
+const nameInput = form.querySelector("#name-input");
+const cardNumberInput = form.querySelector("#card-number-input");
+const monthInput = form.querySelector("#month-input");
+const yearInput = form.querySelector("#year-input");
+const cvcInput = form.querySelector("#cvc-input");
+
+const cardNumberResult = document.getElementById("card-number-result");
+const nameResult = document.getElementById("name-result");
 const monthResult = document.getElementById("month-result");
 const yearResult = document.getElementById("year-result");
+const cvcResult = document.getElementById("cvc-result");
 
 const submitButton = document.querySelector("button");
 
-function showError(input,msg){
-    const label = input.parentElement.querySelector("label");
-    const errorMessage = input.parentElement.querySelector(".error-message");
-
-    label.style.color="var(--light-red)";
-    input.style.borderColor="var(--light-red)";
-    errorMessage.textContent=`${msg}`;
-}
-
-function isValidDate(){
-    const inputDate = new Date(year.value,month.value-1,day.value);
-
-    if(inputDate.getDate()!==Number(day.value) || inputDate.getMonth()!==Number(month.value)-1){
-        showError(day,"Must be a valid date");
-        showError(month,"");
-        showError(year,"");
-        return(false);
-    }
-    return(true);
-}
-
-function showResult(currentDate,inputDate){
-    const todayDay = currentDate.getDate();
-    const todayMonth = currentDate.getMonth() + 1;
-    const todayYear = currentDate.getFullYear();
-
-    let yearDiff = todayYear - year.value;
-    let monthDiff = todayMonth - month.value;
-    let dayDiff = todayDay - day.value;
-
-
-    if(dayDiff<0){
-        monthDiff--;
-        dayDiff += new Date(year.value,month.value,0).getDate();
-    }
-
-    if(monthDiff<0){
-        yearDiff--;
-        monthDiff+=12;
-    }
-
-    yearResult.textContent=`${yearDiff}`;
-    monthResult.textContent=`${monthDiff}`;
-    dayResult.textContent=`${dayDiff}`;
-}
+const successContainer = document.querySelector(".success-container");
 
 function resetErrors(){
-    const inputs = document.querySelectorAll("input");
+    const inputs = form.querySelectorAll("input");
 
     inputs.forEach(input=>{
-        const label = input.parentElement.querySelector("label");
         const errorMessage = input.parentElement.querySelector(".error-message");
 
-        input.style.borderColor="";
-        label.style.color="";
         errorMessage.textContent="";
+        input.style.borderColor="";
     });
+}
+
+function showError(input,msg){
+    const errorMessage = input.parentElement.querySelector(".error-message");
+
+    errorMessage.textContent=`${msg}`;
+    input.style.borderColor="var(--red)";
+}
+
+function showSuccess(){
+    form.classList.add("hidden");
+    successContainer.classList.remove("hidden");
 }
 
 submitButton.addEventListener("click",(e)=>{
     e.preventDefault();
     resetErrors();
-    
-    let isValid = true;
-    const currentDate = new Date();
 
-    if(day.value===""){
-        showError(day,"This field is required");
+    let isValid=true;
+
+    if(nameInput.value===""){
+        showError(nameInput,"Can't be blank");
         isValid=false;
     }
-    else if(day.value>31 || day.value<=0){
-        showError(day,"Must be a valid day");
-        isValid=false;
+    else{
+        nameResult.textContent=`${nameInput.value}`;
     }
 
-    if(month.value===""){
-        showError(month,"This field is required");
+    if(cardNumberInput.value===""){
+        showError(cardNumberInput,"Can't be blank");
         isValid=false;
     }
-    else if(month.value>11 || month.value <0){
-        showError(month,"Must be a valid month");
+    else if(cardNumberInput.value.length !==19){
+        showError(cardNumberInput,"Must contain 16 digits with space in each 4 digits");
+    }
+    else if(isNaN(cardNumberInput.value.replace(/ /g,""))){
+        showError(cardNumberInput,"Wrong format, numbers only");
+        cardNumberResult.textContent=`${cardNumberInput.value}`;
         isValid=false;
     }
-
-    if(year.value===""){
-        showError(year,"This field is required");
-        isValid=false;
-    }
-    else if(year.value>currentDate.getFullYear() || year.value <=0){
-        showError(year,"Must be in the past");
-        isValid=false;
+    else{
+        cardNumberResult.textContent=`${cardNumberInput.value}`;
     }
 
-    if(isValid && isValidDate()){
-        showResult(currentDate,new Date(year.value,month.value-1,day.value));
+    if(monthInput.value===""){
+        showError(monthInput,"Can't be blank");
+        isValid=false;
+    }
+    else if(monthInput.value>11 || monthInput.value<0){
+        showError(monthInput,"Must be a valid date");
+        isValid=false;
+    }
+    else{
+        monthResult.textContent=`${monthInput.value<10?"0"+Number(monthInput.value):monthInput.value}`;
+    }
+
+    if(yearInput.value===""){
+        showError(yearInput,"Can't be blank");
+        isValid=false;
+    }
+    else if(yearInput.value<0 || yearInput.value>99){
+        showError(yearInput,"Must be a valid date");
+        isValid=false;
+    }
+    else{
+        yearResult.textContent=`${yearInput.value<10?"0"+Number(yearInput.value):yearInput.value}`;
+    }
+
+    if(cvcInput.value===""){
+        showError(cvcInput,"Can't be blank");
+        isValid=false;
+    }
+    else if(cvcInput.value <100 || cvcInput.value >999){
+        showError(cvcInput,"Must contain 3 digits");
+        isValid=false;
+    }
+    else{
+        cvcResult.textContent=`${cvcInput.value}`;
+    }
+
+    if(isValid){
+        showSuccess();
     }
 
 });
